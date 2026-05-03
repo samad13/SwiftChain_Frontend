@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { act, renderHook } from '@testing-library/react';
-import { EVENTS, STATUS, type CallBackProps } from 'react-joyride';
+import { EVENTS, STATUS } from 'react-joyride';
 import { useOnboardingTour } from '@/hooks/useOnboardingTour';
 import { onboardingTourService } from '@/services/onboardingTourService';
 
@@ -51,7 +51,7 @@ describe('useOnboardingTour', () => {
         type: EVENTS.STEP_AFTER,
         index: 0,
         action: 'next',
-      } as CallBackProps);
+      } as any);
     });
 
     expect(onboardingTourService.saveTourState).toHaveBeenCalledWith({
@@ -67,7 +67,7 @@ describe('useOnboardingTour', () => {
     act(() => {
       result.current.onJoyrideEvent({
         status: STATUS.FINISHED,
-      } as CallBackProps);
+      } as any);
     });
 
     expect(onboardingTourService.completeTour).toHaveBeenCalledTimes(1);
