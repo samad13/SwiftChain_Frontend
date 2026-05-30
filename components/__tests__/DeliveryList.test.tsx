@@ -8,7 +8,9 @@ import { Delivery } from '@/types/delivery';
 // Mock the useDeliveries hook
 jest.mock('@/hooks/useDeliveries');
 
-const mockUseDeliveries = useDeliveries as jest.MockedFunction<typeof useDeliveries>;
+const mockUseDeliveries = useDeliveries as jest.MockedFunction<
+  typeof useDeliveries
+>;
 
 const mockDeliveries: Delivery[] = [
   {
@@ -53,9 +55,12 @@ const createWrapper = () => {
       queries: { retry: false },
     },
   });
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
+
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+  };
 };
 
 describe('DeliveryList', () => {
