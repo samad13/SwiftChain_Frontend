@@ -28,20 +28,49 @@ export function useAuditTimeline(deliveryId: string | null): UseAuditTimelineRes
   const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState(0);
 
-  const fetchAuditTimeline = useCallback(async () => {
+  useEffect(() => {
     if (!deliveryId) {
-      setEvents([]);
+      Promise.resolve().then(() => setEvents([]));
       return;
     }
 
+    let cancelled = false;
+
+    auditService
+      .getDeliveryAuditTimeline(deliveryId)
+      .then((response) => {
+        if (cancelled) return;
+        setIsLoading(false);
+        if (response.success && response.data) {
+          const sortedEvents = [...response.data.events].sort(
+            (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+          );
+          setEvents(sortedEvents);
+          setTotalCount(response.data.totalCount);
+        } else {
+          setError(response.message ?? 'Failed to fetch audit timeline');
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setIsLoading(false);
+          setError(err instanceof Error ? err.message : 'An error occurred');
+        }
+      });
+
+    // Start loading after kicking off the request
+    Promise.resolve().then(() => { if (!cancelled) setIsLoading(true); });
+
+    return () => { cancelled = true; };
+  }, [deliveryId]);
+
+  const refresh = useCallback(async () => {
+    if (!deliveryId) return;
     setIsLoading(true);
     setError(null);
-
     try {
       const response = await auditService.getDeliveryAuditTimeline(deliveryId);
-
       if (response.success && response.data) {
-        // Sort events chronologically
         const sortedEvents = [...response.data.events].sort(
           (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
         );
@@ -56,14 +85,6 @@ export function useAuditTimeline(deliveryId: string | null): UseAuditTimelineRes
       setIsLoading(false);
     }
   }, [deliveryId]);
-
-  useEffect(() => {
-    void fetchAuditTimeline();
-  }, [fetchAuditTimeline]);
-
-  const refresh = useCallback(async () => {
-    await fetchAuditTimeline();
-  }, [fetchAuditTimeline]);
 
   return {
     events,

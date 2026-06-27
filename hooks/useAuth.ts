@@ -23,27 +23,31 @@ export function useAuth(): UseAuthReturn {
   useEffect(() => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
 
-    if (!token) {
-      clearUser();
-      setIsLoading(false);
-      return;
-    }
-
-    authApiService
-      .getCurrentUser()
-      .then((res) => {
-        if (res.data) {
-          const role: UserRole = API_TO_STORE_ROLE[res.data.role] ?? 'Customer';
-          setUser({ id: res.data.id, email: res.data.email, role });
-        } else {
-          clearUser();
-        }
-      })
-      .catch(() => {
-        localStorage.removeItem('authToken');
+    const verify = async () => {
+      if (!token) {
         clearUser();
-      })
-      .finally(() => setIsLoading(false));
+        setIsLoading(false);
+        return;
+      }
+
+      authApiService
+        .getCurrentUser()
+        .then((res) => {
+          if (res.data) {
+            const role: UserRole = API_TO_STORE_ROLE[res.data.role] ?? 'Customer';
+            setUser({ id: res.data.id, email: res.data.email, role });
+          } else {
+            clearUser();
+          }
+        })
+        .catch(() => {
+          localStorage.removeItem('authToken');
+          clearUser();
+        })
+        .finally(() => setIsLoading(false));
+    };
+
+    void verify();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

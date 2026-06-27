@@ -58,12 +58,50 @@ export function useXLMPriceChart(): UseXLMPriceChartResult {
   }, []);
 
   useEffect(() => {
-    void fetchPriceData(periodDays);
-  }, [periodDays, fetchPriceData]);
+    let cancelled = false;
+
+    const load = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await priceService.getXLMPriceTrend(periodDays);
+        if (cancelled) return;
+        if (response.success && response.data) {
+          setCurrentPrice(response.data.currentPrice);
+          setPercentChange(response.data.percentChange);
+          setPriceHistory(response.data.priceHistory);
+        } else {
+          setError(response.message ?? 'Failed to fetch price data');
+        }
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+
+    void load();
+    return () => { cancelled = true; };
+  }, [periodDays]);
 
   const refresh = useCallback(async () => {
-    await fetchPriceData(periodDays);
-  }, [periodDays, fetchPriceData]);
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await priceService.getXLMPriceTrend(periodDays);
+      if (response.success && response.data) {
+        setCurrentPrice(response.data.currentPrice);
+        setPercentChange(response.data.percentChange);
+        setPriceHistory(response.data.priceHistory);
+      } else {
+        setError(response.message ?? 'Failed to fetch price data');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [periodDays]);
 
   const handleSetPeriodDays = useCallback(async (days: 7 | 30) => {
     setPeriodDays(days);

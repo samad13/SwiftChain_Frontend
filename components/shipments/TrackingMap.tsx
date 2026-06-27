@@ -82,7 +82,7 @@ export function TrackingMap({
     if (!routeData?.waypoints) return [];
 
     return routeData.waypoints.map((w) => [w.coordinate.latitude, w.coordinate.longitude]);
-  }, [routeData?.waypoints]);
+  }, [routeData]);
 
   // Create custom marker icons
   const originMarkerIcon = useMemo(

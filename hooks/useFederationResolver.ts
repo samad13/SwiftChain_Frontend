@@ -26,11 +26,16 @@ export function useFederationResolver() {
   const debounced = useMemo(() => debounce(runResolve, 500), [runResolve]);
 
   useEffect(() => {
-    if (value && value.includes('*')) debounced(value);
-    else {
-      setResult(null);
-      setError(null);
-      setLoading(false);
+    if (value && value.includes('*')) {
+      debounced(value);
+    } else {
+      debounced.cancel();
+      // Schedule resets as a microtask to avoid synchronous setState in effect
+      Promise.resolve().then(() => {
+        setResult(null);
+        setError(null);
+        setLoading(false);
+      });
     }
     return () => debounced.cancel();
   }, [value, debounced]);

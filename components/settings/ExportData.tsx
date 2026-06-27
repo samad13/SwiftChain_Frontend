@@ -101,9 +101,9 @@ export function ExportData() {
       {/* Info Section */}
       <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
         <p className="text-xs text-blue-700 dark:text-blue-300">
-          <span className="font-semibold">What's included:</span> Your profile, deliveries,
+          <span className="font-semibold">What&apos;s included:</span> Your profile, deliveries,
           transactions, dispute history, and all associated metadata. The file will be downloaded as
-          a JSON file with today's date.
+          a JSON file with today&apos;s date.
         </p>
       </div>
 
